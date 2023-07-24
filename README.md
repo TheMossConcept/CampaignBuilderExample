@@ -1,46 +1,14 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+The campaign builder follows the following architecture:
+1) The CampaignBuilder component sets up the skeleton (The top bar, button bar, feedback and validation context which is needed globally, adds in the navigation at the top and adds the individual steps) 
+2) Feedback and validation are both handled through context since these concerns are global to the entire campaign builder. Everything related to feedback can be found in CampaignBuilderFeedback. 
+ Similarly, everything related to validation can be found in CampaignBuilderValidation
+3) The steps in the campaign builder, together with their respective field components, are defined in their own folder
+4) Each field has its own component which takes care of querying the initial value of that field and updating the field value through an anemic mutation. 
+ In addition, they also, potentially, contain custon logic related to the specific field (e.g. the targetNumberOfPosts field conducts a convertion back and fourth between budget)
+5) The CampaignBuilderFormFieldsStateHooks handles all state reuse across fields. It handle validation, registration of mutations in flight for user feedback, debounce and update of validation state 
+ when dynamically displayed fields are shown or hidden. As the name indicates, the value returned from this hook should be used in the mutation as it is debounced and only returned if it is valid.
+ Also, the set method returned from this hook should be used to update the value as it updates internal field state such as pristine and isInitialValue
+6) The field components use generic view components for layout. These are located in the common folder as they are reuseable elsewhere (as opposed to the state hook which is specific for the campaign builder)
+7) Similarly, a reuseable useValidation hook is available in the common folder. This one is also used in UpdateCampaignName since that particular field does not auto-update but not in the other fields
+since the auto-updating logic and the validation logic are interwined it is unfortunately not possible to use the validation hook in the field state hook. To facilitate code reuse despite of this,
+ a doValidation function has been defined which is located together with the useValidation hook
